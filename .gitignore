@@ -1,0 +1,11 @@
+*.DS_Store
+*.aux
+*.bcf
+*.log
+*.nav
+*.out
+*.xml
+*.snm
+*.gz
+*.toc
+lectures/introduction_to_mcmc.pdf

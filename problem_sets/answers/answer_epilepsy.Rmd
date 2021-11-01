@@ -1,0 +1,99 @@
+---
+title: "Bayesian inference for epileptic seizure rates"
+output: html_notebook
+---
+
+In this example, we are going to examine data consisting of a count of seizures for 112 patients with epilepsy who took part in a study (Thall and Vail, 1990).
+
+In this example, we are going to determine the posterior distribution for the rate of seizures. To do so, we are going to assume a) the underlying rate of seizures is the same across all patients, and b) the event of a seizure occurring is independent of any other seizures occurring.
+
+1. Under these assumptions what model might be appropriate for this data?
+
+A Poisson distribution.
+
+2. Write down the likelihood for the data.
+
+The likelihood for a single observation $x$ is given by:
+
+\begin{equation}
+L(\theta|x) = \frac{\theta^x e^{-\theta}}{x!}
+\end{equation}
+
+For a data vector $\boldsymbol{x} = (x_1,x_2,...,x_n)$ if we assume independence between our observations we have:
+
+\begin{equation}
+L(\theta|\boldsymbol{x}) = \prod\limits_{i=1}^{n} \frac{\theta^{x_i} e^{-\theta}}{x_i!}
+\end{equation}
+
+3. Show that a gamma prior is conjugate to this likelihood.
+
+The gamma distribution has the functional form:
+
+\begin{equation}
+p(\theta) \propto \theta^{\alpha-1} e^{-\beta \theta}
+\end{equation}
+
+The posterior then has the functional form:
+
+\begin{align*}
+p(\theta|\boldsymbol{x}) \propto \theta^{\alpha-1} e^{-\beta \theta} \times \prod\limits_{i=1}^{n} \frac{\theta^{x_i} e^{-\theta}}{x_i!}\\
+\propto \theta^{\alpha-1 + \sum\limits_{i=1}^{n} x_i} \times e^{-(\beta+n)\theta}
+\end{align*}
+
+Which is the same $\theta$ dependence as a $\Gamma(\alpha + \sum\limits_{i=1}^{n} x_i,\beta + n)$ distribution $\implies$ this must be the posterior distribution! Therefore the posterior is a gamma distribution as well as the prior $\therefore$ conjugate.
+
+4. Assuming a $\Gamma(4,0.25)$ (with a parameterisation such that it has mean of 16) prior. Find the posterior distribution, and graph it.
+
+```{r}
+library(tidyverse)
+df <- read.csv("../data/conjugate_epil.csv")
+sum_x <- sum(df$x)
+n <- nrow(df)
+a <- 4
+b <- 0.25
+posterior <- function(lambda) {
+  dgamma(lambda, a + sum_x, b + n)
+}
+lambda <- seq(0, 20, 0.01)
+density <- map_dbl(lambda, posterior)
+plot(lambda, density, type='l')
+```
+
+5. Determine the 95\% credible interval for $\lambda$ using the 2.5\%-97.5\% posterior quantiles.
+```{r}
+lower <- qgamma(0.025, a + sum_x, b + n)
+upper <- qgamma(0.975, a + sum_x, b + n)
+print(paste0("lower = ", lower, ", upper = ", upper))
+```
+
+6. Calculate the posterior mean parameter estimate.
+```{r}
+lambda_mean <- (a + sum_x) / (b + n)
+lambda_mean
+```
+
+7. Assuming $\lambda$ is at the posterior mean value, simulate data for $n=112$ patients. What's the mean of your sample?
+```{r}
+x_sim <- rpois(112, lambda_mean)
+mean(x_sim)
+```
+
+Note that the mean will vary but it should be near the posterior mean $\lambda$ value.
+
+8. By drawing histograms of the real and simulated data, comment on the suitability of the model.
+```{r}
+tibble(actual=df$x,
+       simulated=x_sim) %>% 
+  pivot_longer(cols=c(actual, simulated)) %>% 
+  ggplot(aes(x=value, fill=name)) +
+  geom_histogram(position="identity", alpha=0.5) +
+  xlab("Seizure number") +
+  ylab("Frequency") +
+  scale_fill_brewer("Data", palette = "Dark2")
+```
+
+The simulated data has a much smaller variance than the real data: it looks like our model is missing something important!
+
+9. Why do you think the model is inappropriate?
+
+Seizures within a patient are known to cluster together: if one seizure occurs, this makes it more likely that another will occur soon afterwards. This contrasts with the Poisson model, which assumes that each event occurs independently of each other event. Because of this we would do better to use a negative binomial model, which allows for non-independence of events.

@@ -1,0 +1,175 @@
+---
+title: "Introduction to Bayesian inference using a disease prevalence example"
+output: html_notebook
+---
+
+In this exercise, we invite participants to use Bayesian inference to estimate the prevalence of a disease.
+
+
+## Aim
+Suppose we collect data $X = 4$ individuals testing positive for a disease in a sample of size $N = 10$. Our aim is to estimate the disease prevalence, $\theta$, in the population the individuals were sampled from.
+
+## Determining an appropriate probability distribution
+1. Why would you not use a normal distribution to represent the model which generated the data?
+
+The data are discrete, not continuous.
+
+2. Why would you not use a Poisson distribution?
+
+The data have an upper bound of $N$.
+
+3. Why might a binomial distribution be an appropriate probability distribution?
+
+It may be if we assume the individuals were randomly sampled (i.e. independently and identically distributed).
+
+4. Plot the binomial distribution with $N=10$ and show how it varies across $\theta = (0.1, 0.5, 0.9)$.
+
+```{r}
+rm(list=ls())
+library(tidyverse)
+library(reshape2)
+N <- 10
+theta <- 0.1
+x_values <- seq(0, N, 1)
+density_values <- map_dbl(x_values, ~dbinom(., N, theta))
+qplot(x_values, density_values) +
+  xlab("X") +
+  ylab("Density")
+
+theta <- 0.5
+x_values <- seq(0, N, 1)
+density_values <- map_dbl(x_values, ~dbinom(., N, theta))
+qplot(x_values, density_values) +
+  xlab("X") +
+  ylab("Density")
+
+theta <- 0.9
+x_values <- seq(0, N, 1)
+density_values <- map_dbl(x_values, ~dbinom(., N, theta))
+qplot(x_values, density_values) +
+  xlab("X") +
+  ylab("Density")
+```
+
+## Maximum likelihood estimation
+5. Plot the likelihood function.
+```{r}
+X <- 4
+N <- 10
+theta <- seq(0, 1, length.out = 300)
+likelihood_values <- map_dbl(theta, ~dbinom(X, N, .))
+tibble(theta=theta, likelihood=likelihood_values) %>%
+  ggplot(aes(theta, likelihood)) +
+  geom_line() +
+  xlab("theta") +
+  ylab("Density")
+```
+
+6. What's the maximum likelihood estimate of $\theta$?
+
+There are two ways to handle this: one is mathematical and involves maximising the (log-)likelihood; the other just uses numerical search.
+
+Mathematical. The likelihood is:
+
+$L = {N \choose X} \theta^X (1-\theta)^{N-X}$
+
+The log-likelihood is:
+$\log L \propto X \log \theta + (N - X) \log (1 -\theta)$ 
+
+Now differentiate to find max likelihood estimator:
+
+$\frac{d\log L}{d\theta} \propto \frac{X}{\theta} - \frac{N - X}{1-\theta} = 0$
+
+Rearranging, we get: $\theta = \frac{X}{N} = \frac{4}{10}$, i.e. the proportion of disease-positive examples in our data.
+
+The numerical way is as below.
+```{r}
+# optim works by minimising, so take -1 * likelihood
+res <- optim(0.5, function(theta) -dbinom(X, N, theta))
+res$par
+```
+
+## Bayesian estimation
+7. Assume that based on a previous meta-analysis, we have a prior $\theta\sim \text{beta}(1, 4)$. Plot the numerator of Bayes' rule: $p(\theta)\times p(X|\theta)$.
+
+```{r}
+likelihood <- function(theta) dbinom(X, N, theta)
+prior <- function(theta) dbeta(theta, 1, 4)
+numerator <- function(theta) likelihood(theta) * prior(theta)
+
+numerator_values <- map_dbl(theta, ~numerator(.))
+tibble(theta=theta, numerator=numerator_values) %>%
+  ggplot(aes(x=theta, y=numerator)) +
+  geom_line()
+```
+
+8. Determine the denominator of Bayes' rule using numerical integration:
+
+- in R, this can be done using the `integrate` function
+- in Python, this can be done using `scipy.integrate.quad`
+
+```{r}
+p_data <- integrate(function(theta) numerator(theta), 0, 1)$value
+p_data
+```
+
+9. Hence make a function that yields the posterior density.
+```{r}
+posterior <- function(theta) numerator(theta) / p_data
+
+posterior_values <- map_dbl(theta, ~posterior(.))
+tibble(theta=theta, posterior=posterior_values) %>%
+  ggplot(aes(x=theta, y=posterior)) +
+  geom_line()
+```
+
+10. An alternative way to obtain the posterior distribution is to use conjugate prior rules. i.e. that if $\theta\sim \text{beta}(a, b)$ and $X|\theta\sim \mathcal{B}(N, \theta)$, then $\theta|X\sim \text{beta}(a + X, b + N - X)$. Use this relationship to investigate how the posterior changes holding $b=4$ and change from $a=1$ to $a=8$.
+
+```{r}
+posterior_conj <- function(theta, a) dbeta(theta, a + X, 4 + N - X)
+a <- 1
+posterior_values <- map_dbl(theta, ~posterior_conj(., a))
+tibble(theta=theta, posterior=posterior_values) %>% 
+  ggplot(aes(x=theta, y=posterior)) +
+  geom_line()
+
+a <- 8
+posterior_values <- map_dbl(theta, ~posterior_conj(., a))
+tibble(theta=theta, posterior=posterior_values) %>% 
+  ggplot(aes(x=theta, y=posterior)) +
+  geom_line()
+```
+
+11. Calculate the posterior 10\%-90\% quantiles assuming $a=1$.
+```{r}
+a <- 1
+b <- 4
+lower <- qbeta(0.1, a + X, b + N - X)
+upper <- qbeta(0.9, a + X, b + N - X)
+c(lower, upper)
+```
+
+12. Forecast what data will be obtained in a second experiment, where $N=100$ assuming $a=1$. You can do this by sampling by iterating the following steps:
+
+- $\theta_i \sim p(\theta|X)$, i.e. draw from the posterior distribution.
+- $X_i \sim p(X|\theta_i)$, i.e. draw from the sampling distribution.
+
+The distribution of $p(X)$ obtained via this process is known as the posterior predictive distribution. In your case, use 10,000 draws from this distribution then plot a histogram of the resultant draws.
+
+```{r}
+n_draws <- 10000
+Xs <- vector(length = n_draws)
+for(i in 1:n_draws) {
+  theta_i <- rbeta(1, a + X, b + N - X)
+  Xs[i] <- rbinom(1, 100, theta_i)
+}
+
+qplot(Xs) +
+  geom_histogram(bins=10)
+```
+
+13. Use your posterior predictive distribution to determine $Pr(X > 50)$ in a new experiment.
+```{r}
+mean(Xs > 50)
+```
+

@@ -1,0 +1,26 @@
+---
+title: "Bayesian inference for epileptic seizure rates"
+output: html_notebook
+---
+
+In this example, we are going to examine data consisting of a count of seizures for 112 patients with epilepsy who took part in a study (Thall and Vail, 1990).
+
+In this example, we are going to determine the posterior distribution for the rate of seizures. To do so, we are going to assume a) the underlying rate of seizures is the same across all patients, and b) the event of a seizure occurring is independent of any other seizures occurring.
+
+1. Under these assumptions what model might be appropriate for this data?
+
+2. Write down the likelihood for the data.
+
+3. Show that a gamma prior is conjugate to this likelihood.
+
+4. Assuming a $\Gamma(4,0.25)$ (with a parameterisation such that it has mean of 16) prior. Find the posterior distribution, and graph it.
+
+5. Determine the 95\% credible interval for $\lambda$ using the 2.5\%-97.5\% posterior quantiles.
+
+6. Calculate the posterior mean parameter estimate.
+
+7. Assuming $\lambda$ is at the posterior mean value, simulate data for $n=112$ patients. What's the mean of your sample?
+
+8. By drawing histograms of the real and simulated data, comment on the suitability of the model.
+
+9. Why do you think the model is inappropriate?

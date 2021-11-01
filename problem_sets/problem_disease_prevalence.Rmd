@@ -1,0 +1,47 @@
+---
+title: "Introduction to Bayesian inference using a disease prevalence example"
+output: html_notebook
+---
+
+In this exercise, we invite participants to use Bayesian inference to estimate the prevalence of a disease.
+
+
+## Aim
+Suppose we collect data $X = 4$ individuals testing positive for a disease in a sample of size $N = 10$. Our aim is to estimate the disease prevalence, $\theta$, in the population the individuals were sampled from.
+
+## Determining an appropriate probability distribution
+1. Why would you not use a normal distribution to represent the model which generated the data?
+
+2. Why would you not use a Poisson distribution?
+
+3. Why might a binomial distribution be an appropriate probability distribution?
+
+4. Plot the binomial distribution with $N=10$ and show how it varies across $\theta = (0.1, 0.5, 0.9)$.
+
+## Maximum likelihood estimation
+5. Plot the likelihood function
+
+6. What's the maximum likelihood estimate of $\theta$?
+
+## Bayesian estimation
+7. Assume that based on a previous meta-analysis, we have a prior $\theta\sim \text{beta}(1, 4)$. Plot the numerator of Bayes' rule: $p(\theta)\times p(X|\theta)$.
+
+8. Determine the denominator of Bayes' rule using numerical integration:
+
+- in R, this can be done using the `integrate` function
+- in Python, this can be done using `scipy.integrate.quad`
+
+9. Hence make a function that yields the posterior density.
+
+10. An alternative way to obtain the posterior distribution is to use conjugate prior rules. i.e. that if $\theta\sim \text{beta}(a, b)$ and $X|\theta\sim \mathcal{B}(N, \theta)$, then $\theta|X\sim \text{beta}(a + X, b + N - X)$. Use this relationship to investigate how the posterior changes holding $b=4$ and change from $a=1$ to $a=8$.
+
+11. Calculate the posterior 10\%-90\% quantiles assuming $a=1$.
+
+12. Forecast what data will be obtained in a second experiment, where $N=100$ assuming $a=1$. You can do this by sampling by iterating the following steps:
+
+- $\theta_i \sim p(\theta|X)$, i.e. draw from the posterior distribution.
+- $X_i \sim p(X|\theta_i)$, i.e. draw from the sampling distribution.
+
+The distribution of $p(X)$ obtained via this process is known as the posterior predictive distribution. In your case, use 10,000 draws from this distribution then plot a histogram of the resultant draws.
+
+13. Use your posterior predictive distribution to determine $Pr(X > 50)$ in a new experiment.
