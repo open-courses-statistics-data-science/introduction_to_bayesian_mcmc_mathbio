@@ -1,0 +1,14 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+fPriorPredictive \PYG{o}{\PYGZlt{}\PYGZhy{}} \PYG{k+kr}{function}\PYG{p}{(}numSamples\PYG{p}{,}a\PYG{p}{,}b\PYG{p}{,}N\PYG{p}{)\PYGZob{}}
+  lX \PYG{o}{\PYGZlt{}\PYGZhy{}} \PYG{k+kt}{vector}\PYG{p}{(}length \PYG{o}{=} numSamples\PYG{p}{)}
+  \PYG{k+kr}{for}\PYG{p}{(}i \PYG{k+kr}{in} \PYG{l+m}{1}\PYG{o}{:}numSamples\PYG{p}{)\PYGZob{}}
+    theta \PYG{o}{\PYGZlt{}\PYGZhy{}} rbeta\PYG{p}{(}\PYG{l+m}{1}\PYG{p}{,}a\PYG{p}{,}b\PYG{p}{)}
+    lX\PYG{p}{[}i\PYG{p}{]} \PYG{o}{\PYGZlt{}\PYGZhy{}} rbinom\PYG{p}{(}\PYG{l+m}{1}\PYG{p}{,}N\PYG{p}{,}theta\PYG{p}{)}
+  \PYG{p}{\PYGZcb{}}
+  \PYG{k+kr}{return}\PYG{p}{(}lX\PYG{p}{)}
+\PYG{p}{\PYGZcb{}}
+
+lX \PYG{o}{\PYGZlt{}\PYGZhy{}} fPriorPredictive\PYG{p}{(}\PYG{l+m}{1000}\PYG{p}{,}\PYG{l+m}{1}\PYG{p}{,}\PYG{l+m}{1}\PYG{p}{,}\PYG{l+m}{100}\PYG{p}{)}
+hist\PYG{p}{(}lX\PYG{p}{)}
+\PYG{k+kp}{mean}\PYG{p}{(}lX\PYG{p}{)}
+\end{Verbatim}
