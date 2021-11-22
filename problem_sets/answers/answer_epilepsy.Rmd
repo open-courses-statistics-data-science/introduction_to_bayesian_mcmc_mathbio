@@ -16,13 +16,13 @@ A Poisson distribution.
 The likelihood for a single observation $x$ is given by:
 
 \begin{equation}
-L(\theta|x) = \frac{\theta^x e^{-\theta}}{x!}
+L(\lambda|x) = \frac{\lambda^x e^{-\lambda}}{x!}
 \end{equation}
 
 For a data vector $\boldsymbol{x} = (x_1,x_2,...,x_n)$ if we assume independence between our observations we have:
 
 \begin{equation}
-L(\theta|\boldsymbol{x}) = \prod\limits_{i=1}^{n} \frac{\theta^{x_i} e^{-\theta}}{x_i!}
+L(\lambda|\boldsymbol{x}) = \prod\limits_{i=1}^{n} \frac{\lambda^{x_i} e^{-\lambda}}{x_i!}
 \end{equation}
 
 3. Show that a gamma prior is conjugate to this likelihood.
@@ -30,19 +30,19 @@ L(\theta|\boldsymbol{x}) = \prod\limits_{i=1}^{n} \frac{\theta^{x_i} e^{-\theta}
 The gamma distribution has the functional form:
 
 \begin{equation}
-p(\theta) \propto \theta^{\alpha-1} e^{-\beta \theta}
+p(\lambda) \propto \lambda^{\alpha-1} e^{-\beta \lambda}
 \end{equation}
 
 The posterior then has the functional form:
 
 \begin{align*}
-p(\theta|\boldsymbol{x}) \propto \theta^{\alpha-1} e^{-\beta \theta} \times \prod\limits_{i=1}^{n} \frac{\theta^{x_i} e^{-\theta}}{x_i!}\\
-\propto \theta^{\alpha-1 + \sum\limits_{i=1}^{n} x_i} \times e^{-(\beta+n)\theta}
+p(\lambda|\boldsymbol{x}) \propto \lambda^{\alpha-1} e^{-\beta \lambda} \times \prod\limits_{i=1}^{n} \frac{\lambda^{x_i} e^{-\lambda}}{x_i!}\\
+\propto \lambda^{\alpha-1 + \sum\limits_{i=1}^{n} x_i} \times e^{-(\beta+n)\lambda}
 \end{align*}
 
-Which is the same $\theta$ dependence as a $\Gamma(\alpha + \sum\limits_{i=1}^{n} x_i,\beta + n)$ distribution $\implies$ this must be the posterior distribution! Therefore the posterior is a gamma distribution as well as the prior $\therefore$ conjugate.
+Which is the same $\lambda$ dependence as a $\Gamma(\alpha + \sum\limits_{i=1}^{n} x_i,\beta + n)$ distribution $\implies$ this must be the posterior distribution! Therefore the posterior is a gamma distribution as well as the prior $\therefore$ conjugate.
 
-4. Assuming a $\Gamma(4,0.25)$ (with a parameterisation such that it has mean of 16) prior. Find the posterior distribution, and graph it.
+4. Assuming a $\Gamma(4,0.25)$ (with a parameterisation such that it has mean of 16) prior on the mean parameter, $\lambda$, of the Poisson likelihood, find the posterior distribution and graph it.
 
 ```{r}
 library(tidyverse)

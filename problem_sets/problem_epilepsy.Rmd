@@ -13,7 +13,7 @@ In this example, we are going to determine the posterior distribution for the ra
 
 3. Show that a gamma prior is conjugate to this likelihood.
 
-4. Assuming a $\Gamma(4,0.25)$ (with a parameterisation such that it has mean of 16) prior. Find the posterior distribution, and graph it.
+4. Assuming a $\Gamma(4,0.25)$ (with a parameterisation such that it has mean of 16) prior on the mean parameter, $\lambda$, of the Poisson likelihood, find the posterior distribution and graph it.
 
 5. Determine the 95\% credible interval for $\lambda$ using the 2.5\%-97.5\% posterior quantiles.
 
